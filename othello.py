@@ -56,7 +56,7 @@ def update_leaderboard(student_id,team_name, final_score):
     save_leaderboard(df)
 
 
-# Classe du jeu Othello
+# Classe du jeu Othello qu'on peut aussi aussi
 class Othello:
     def __init__(self):
         self.board = np.zeros((8, 8), dtype=int)
@@ -65,6 +65,9 @@ class Othello:
         self.current_player = BLACK
 
     def get_valid_moves(self, player):
+        """
+        Determiner toutes les positions legales pour le joueur en question
+        """
         valid_moves = []
         for row in range(8):
             for col in range(8):
@@ -73,6 +76,9 @@ class Othello:
         return valid_moves
 
     def is_valid_move(self, row, col, player):
+        """
+        Retourne vrai si le move est valide pour le joueur, faux sinon
+        """
         if self.board[row, col] != EMPTY:
             return False
         directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1),
@@ -115,7 +121,13 @@ def evaluate_board(board):
     return np.sum(board == WHITE) - np.sum(board == BLACK)
 
 def minimax(board, depth, maximizing, player):
-    """Minimax AI with depth limit."""
+    """
+    Minimax AI with depth limit.
+    board: Le board du jeu
+    depth: Le nombre de plies
+    maximizing: True si le joueur cherche a maximiser, false sinonn
+    player: Le joueur
+    """
     game = Othello()
     game.board = board.copy()
 
@@ -126,9 +138,9 @@ def minimax(board, depth, maximizing, player):
     best_move = None
 
     if maximizing:
-        max_eval = float("-inf")
+        max_eval = float("-inf")        #
         for move in valid_moves:
-            new_board = game.board.copy()
+            new_board = game.board.copy()  #
             game.apply_move(move, player)
             eval_score, _ = minimax(new_board, depth - 1, False, -player)
             if eval_score > max_eval:
@@ -145,7 +157,7 @@ def minimax(board, depth, maximizing, player):
                 min_eval = eval_score
                 best_move = move
         return min_eval, best_move
-
+# COMMENT USE LES FONCTIONS
 def minimax_ai(board, player):
     """AI wrapper for Minimax with depth=3"""
     _, best_move = minimax(board, DEPTH, True, player)
