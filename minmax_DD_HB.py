@@ -25,6 +25,8 @@ def creer_table_heuristiques():
     return heuristiques
 
 
+heuristique_table = creer_table_heuristiques()
+
 def getAllPlayerCases(board, player):
     """
     Retourne toutes les positions sur le plateau occupées par le joueur.
@@ -32,35 +34,38 @@ def getAllPlayerCases(board, player):
     return [(row, col) for row in range(8) for col in range(8) if board[row, col] == player]
 
 
-def sum_players_cases_score(board, cases, heuristique):
+def sum_players_cases_score(board, cases):
     """
     Calcule la somme des valeurs heuristiques pour une liste de positions.
     """
     sum_scores = 0
     for position in cases:
-        sum_scores += heuristique.get(position, 0)
+        sum_scores += heuristique_table.get(position, 0)
     return sum_scores
 
 
-def new_evalute_board(board, player, heuristique):
+def new_evalute_board(board, player):
     """
     Fonction d'évaluation améliorée qui combine :
       - le nombre de pièces du joueur,
       - la somme des heuristiques des cases occupées,
-      - et la somme des heuristiques pour les coups possibles.
+      - et la somme du nombre de coups possibles.
     """
     playerCases = getAllPlayerCases(board, player)
     game = Othello()
-    game.board = np.copy(board)
-    validMoves = game.get_valid_moves(player)
-
-    sum_current_player_cases = sum_players_cases_score(board, playerCases, heuristique)
-    sum_valid_moves = sum_players_cases_score(board, validMoves, heuristique)
-
-    return np.sum(board == player) + sum_current_player_cases + sum_valid_moves
+    game.board = board
 
 
-def minimax_upgraded(board, depth, maximizing, player, heuristique_table):
+
+
+    critere_1 = np.sum(board == BLACK) - np.sum(board == WHITE)
+    critere_2 = sum_players_cases_score(board, playerCases)
+    critere3 = len(game.get_valid_moves(player))
+
+    return   critere_1 + critere_2 + critere3
+
+
+def minimax_upgraded(board, depth, maximizing, player):
     """
     Minimax amélioré avec limite de profondeur.
 
@@ -69,7 +74,6 @@ def minimax_upgraded(board, depth, maximizing, player, heuristique_table):
       - depth : la profondeur restante d'exploration
       - maximizing : booléen indiquant si c'est le tour du joueur maximisant
       - player : le joueur courant (par exemple, BLACK ou WHITE)
-      - heuristique_table : dictionnaire des valeurs heuristiques
 
     Retourne un tuple (score, meilleur_coup).
     """
@@ -78,13 +82,13 @@ def minimax_upgraded(board, depth, maximizing, player, heuristique_table):
     game.board = board.copy()
 
     if depth == 0 or game.is_game_over():
-        return new_evalute_board(game.board, player, heuristique_table), None
+        return new_evalute_board(game.board, player), None
 
     valid_moves = game.get_valid_moves(player)
 
     # Si aucun coup n'est possible, on passe le tour (en diminuant la profondeur)
     if not valid_moves:
-        return minimax_upgraded(board, depth - 1, not maximizing, -player, heuristique_table)
+        return minimax_upgraded(board, depth - 1, not maximizing, -player)
 
     best_move = None
 
@@ -95,7 +99,7 @@ def minimax_upgraded(board, depth, maximizing, player, heuristique_table):
             new_game = Othello()
             new_game.board = board.copy()
             new_game.apply_move(move, player)
-            eval_score, _ = minimax_upgraded(new_game.board, depth - 1, False, -player, heuristique_table)
+            eval_score, _ = minimax_upgraded(new_game.board, depth - 1, False, -player)
             if eval_score > max_eval:
                 max_eval = eval_score
                 best_move = move
@@ -106,17 +110,19 @@ def minimax_upgraded(board, depth, maximizing, player, heuristique_table):
             new_game = Othello()
             new_game.board = board.copy()
             new_game.apply_move(move, player)
-            eval_score, _ = minimax_upgraded(new_game.board, depth - 1, True, -player, heuristique_table)
+            eval_score, _ = minimax_upgraded(new_game.board, depth - 1, True, -player)
             if eval_score < min_eval:
                 min_eval = eval_score
                 best_move = move
         return min_eval, best_move
 
 
+
+
+
 def user_ai(board, player):
     """
     Wrapper de l'IA qui initialise la table d'heuristiques et lance le minimax amélioré.
     """
-    heuristique_table = creer_table_heuristiques()
-    _, best_move = minimax_upgraded(board, 6, True, player, heuristique_table)
+    _, best_move = minimax_upgraded(board, 6, True, player)
     return best_move
