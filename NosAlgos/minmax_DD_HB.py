@@ -2,7 +2,7 @@
 
 # 1ER AVIS: Le minmax fonctionne, mais il est fucking long. On peut essayer d'ameliorer la complexite de l'algo (tant qu'en espace qu'en temps)
 
-
+myPlayer = None
 def creer_table_heuristiques():
     """
     Retourne un dictionnaire des valeurs heuristiques pour chaque case (row, col) d'un plateau 8x8.
@@ -31,7 +31,10 @@ def getAllPlayerCases(board, player):
     """
     Retourne toutes les positions sur le plateau occupées par le joueur.
     """
-    return [(row, col) for row in range(8) for col in range(8) if board[row, col] == player]
+    # np.argwhere retourne un tableau de coordonnées (row, col)
+    positions = np.argwhere(board == player)
+
+    return [tuple(pos) for pos in positions]
 
 
 def sum_players_cases_score(board, cases):
@@ -55,10 +58,11 @@ def new_evalute_board(board, player):
     game = Othello()
     game.board = board
 
+    if myPlayer == BLACK:
+        critere_1 = np.sum(board == BLACK) - np.sum(board == WHITE)
+    else:
+        critere_1 = np.sum(board == WHITE) - np.sum(board == BLACK)
 
-
-
-    critere_1 = np.sum(board == BLACK) - np.sum(board == WHITE)
     critere_2 = sum_players_cases_score(board, playerCases)
     critere3 = len(game.get_valid_moves(player))
 
@@ -124,5 +128,8 @@ def user_ai(board, player):
     """
     Wrapper de l'IA qui initialise la table d'heuristiques et lance le minimax amélioré.
     """
-    _, best_move = minimax_upgraded(board, 6, True, player)
+    myPlayer = player
+    depth = 6
+    maximizingBool = (depth % 2 == 1)
+    _, best_move = minimax_upgraded(board, depth, maximizingBool, player)
     return best_move
