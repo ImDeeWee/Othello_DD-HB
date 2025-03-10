@@ -130,6 +130,6 @@ def user_ai(board, player):
     """
     myPlayer = player
     depth = 6
-    maximizingBool = (depth % 2 == 1)
+    maximizingBool = (depth % 2 == 0)
     _, best_move = minimax_upgraded(board, depth, maximizingBool, player)
     return best_move

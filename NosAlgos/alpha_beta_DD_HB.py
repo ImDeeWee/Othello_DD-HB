@@ -162,8 +162,8 @@ def user_ai(board, player):
     """
     myPlayer = player
     depth = 7
+    maximizingBool = (depth % 2 == 0)
     alpha = float("-inf")
     beta = float("inf")
-    maximizingBool = (depth % 2 == 1)
     best_score, best_move = alpha_beta_upgraded(board, depth, alpha, beta, maximizingBool, player)
     return best_move
