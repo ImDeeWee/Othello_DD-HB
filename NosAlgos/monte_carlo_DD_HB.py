@@ -44,33 +44,15 @@ class Node:
     def best_child(self, c_param=1.414):
         best_child = None
         best_value = -float('inf')
-        
-        explore_factor = min(1.0, 5.0 / np.sqrt(self.visits + 1))
-        
         for child in self.children:
-            exploit = child.wins / child.visits if child.visits > 0 else 0
-            explore = c_param * np.sqrt(np.log(self.visits) / child.visits) if child.visits > 0 else float('inf')
-            
-            position_value = 0
-            if child.move:
-                r, c = child.move
-                if (r == 0 and c == 0) or (r == 0 and c == 7) or (r == 7 and c == 0) or (r == 7 and c == 7):
-                    position_value = 0.5
-
-                elif ((r <= 1 and c <= 1) or (r <= 1 and c >= 6) or 
-                      (r >= 6 and c <= 1) or (r >= 6 and c >= 6)):
-                    position_value = -0.3
-
-                elif r == 0 or c == 0 or r == 7 or c == 7:
-                    position_value = 0.2
-            
-            value = exploit + explore_factor * explore + 0.1 * position_value
-            
-            if value > best_value:
-                best_value = value
+            avg_reward = child.wins / child.visits if child.visits > 0 else 0
+            exploration = c_param * np.sqrt(np.log(self.visits) / child.visits) if child.visits > 0 else float('inf')
+            ucb_value = avg_reward + exploration
+            if ucb_value > best_value:
+                best_value = ucb_value
                 best_child = child
-                
         return best_child
+
 
 
 def rollout(board, player):
